@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 
-// ─── SpaceX Email Template (mirrors your api/email-template.js) ───────────────
+// ─── SpaceX Email Template ─────────────────────────────────────────────────────
 function buildEmailHTML({ title, mainMessage, buttonText, buttonUrl, heroImage }) {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -103,8 +103,8 @@ function buildEmailHTML({ title, mainMessage, buttonText, buttonUrl, heroImage }
 </html>`;
 }
 
-// ─── Built-in Templates ────────────────────────────────────────────────────────
-const TEMPLATES = [
+// ─── Built-in Starter Templates ────────────────────────────────────────────────
+const STARTER_TEMPLATES = [
   {
     id: 'blank',
     label: '✦ Blank',
@@ -128,7 +128,7 @@ const TEMPLATES = [
   {
     id: 'event',
     label: '📅 Event Invitation',
-    subject: 'You\'re Invited — Private Event',
+    subject: "You're Invited — Private Event",
     title: 'Exclusive Event Invitation',
     message: 'You have been selected for an exclusive private event. This is a closed gathering for verified members only. Please confirm your attendance using the link below.',
     buttonText: 'CONFIRM ATTENDANCE',
@@ -157,15 +157,12 @@ const TEMPLATES = [
   },
 ];
 
-// ─── Draft Storage (localStorage as JSON) ─────────────────────────────────────
+// ─── Draft Storage ─────────────────────────────────────────────────────────────
 const DRAFT_KEY = 'mailops_drafts';
-
 function loadDrafts() {
-  try {
-    return JSON.parse(localStorage.getItem(DRAFT_KEY) || '[]');
-  } catch { return []; }
+  try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || '[]'); }
+  catch { return []; }
 }
-
 function saveDrafts(drafts) {
   localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts));
 }
@@ -206,10 +203,8 @@ const css = `
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ── Layout ── */
   .app { display: flex; flex-direction: column; min-height: 100dvh; max-width: 680px; margin: 0 auto; }
 
-  /* ── Header ── */
   .header {
     position: sticky; top: 0; z-index: 20;
     background: var(--background);
@@ -222,32 +217,25 @@ const css = `
   .header-title { font-size: 18px; font-weight: 500; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; }
   .header-actions { display: flex; align-items: center; gap: 8px; }
 
-  /* ── Tabs ── */
-  .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--background); position: sticky; top: 57px; z-index: 19; }
+  .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--background); position: sticky; top: 57px; z-index: 19; overflow-x: auto; }
   .tab {
     flex: 1; padding: 11px 8px; font-family: var(--font); font-size: 11px; letter-spacing: 0.12em;
     text-transform: uppercase; color: var(--muted-foreground); background: transparent;
     border: none; cursor: pointer; border-bottom: 2px solid transparent;
     transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px;
+    white-space: nowrap; min-width: 0;
   }
   .tab.active { color: var(--foreground); border-bottom-color: var(--gold); }
   .tab:hover:not(.active) { color: var(--foreground); }
 
-  /* ── Content ── */
   .content { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 
-  /* ── Card ── */
-  .card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); overflow: hidden;
-  }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
   .card-section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
   .card-section:last-child { border-bottom: none; }
 
-  /* ── Label ── */
   .label { font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted-foreground); margin-bottom: 6px; display: block; }
 
-  /* ── Input ── */
   .input {
     width: 100%; background: var(--input); border: 1px solid var(--border);
     border-radius: calc(var(--radius) - 2px); color: var(--foreground);
@@ -257,7 +245,6 @@ const css = `
   .input:focus { border-color: var(--ring); }
   .input::placeholder { color: var(--muted-foreground); }
 
-  /* ── Textarea ── */
   .textarea {
     width: 100%; background: var(--input); border: 1px solid var(--border);
     border-radius: calc(var(--radius) - 2px); color: var(--foreground);
@@ -268,7 +255,6 @@ const css = `
   .textarea:focus { border-color: var(--ring); }
   .textarea::placeholder { color: var(--muted-foreground); }
 
-  /* ── Select ── */
   .select {
     width: 100%; background: var(--input); border: 1px solid var(--border);
     border-radius: calc(var(--radius) - 2px); color: var(--foreground);
@@ -280,38 +266,21 @@ const css = `
   }
   .select:focus { border-color: var(--ring); }
 
-  /* ── Buttons ── */
   .btn {
     font-family: var(--font); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
     border-radius: calc(var(--radius) - 2px); border: none; cursor: pointer;
     transition: all 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     padding: 10px 16px; white-space: nowrap;
   }
-  .btn-primary {
-    background: var(--primary); color: var(--primary-foreground);
-    font-weight: 500;
-  }
+  .btn-primary { background: var(--primary); color: var(--primary-foreground); font-weight: 500; }
   .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
   .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-  .btn-secondary {
-    background: var(--secondary); color: var(--secondary-foreground);
-    border: 1px solid var(--border);
-  }
+  .btn-secondary { background: var(--secondary); color: var(--secondary-foreground); border: 1px solid var(--border); }
   .btn-secondary:active { opacity: 0.75; }
-
-  .btn-ghost {
-    background: transparent; color: var(--muted-foreground);
-    border: 1px solid transparent; padding: 8px 12px;
-  }
+  .btn-ghost { background: transparent; color: var(--muted-foreground); border: 1px solid transparent; padding: 8px 12px; }
   .btn-ghost:hover { color: var(--foreground); border-color: var(--border); }
-
-  .btn-danger {
-    background: transparent; color: var(--destructive);
-    border: 1px solid transparent; padding: 8px 10px; font-size: 10px;
-  }
+  .btn-danger { background: transparent; color: var(--destructive); border: 1px solid transparent; padding: 8px 10px; font-size: 10px; }
   .btn-danger:hover { border-color: var(--destructive); }
-
   .btn-gold {
     background: linear-gradient(135deg, #c9a84c, #8a6520);
     color: #0a0a0b; font-weight: 600;
@@ -319,17 +288,22 @@ const css = `
   }
   .btn-gold:active:not(:disabled) { transform: scale(0.97); }
   .btn-gold:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-save-template {
+    background: oklch(0.30 0 0); color: var(--gold);
+    border: 1px solid oklch(0.65 0.15 85 / 30%);
+    font-size: 10px; padding: 8px 12px;
+  }
+  .btn-save-template:hover { background: oklch(0.35 0 0); }
 
-  /* ── Footer bar ── */
   .footer-bar {
     position: sticky; bottom: 0; background: var(--background);
     border-top: 1px solid var(--border);
     padding: 12px 16px; display: flex; align-items: center;
-    justify-content: space-between; gap: 10px;
+    justify-content: space-between; gap: 8px; flex-wrap: wrap;
     padding-bottom: max(12px, env(safe-area-inset-bottom));
   }
+  .footer-left { display: flex; gap: 8px; }
 
-  /* ── Status badge ── */
   .badge {
     font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
     padding: 4px 10px; border-radius: 2px; border: 1px solid var(--border);
@@ -340,7 +314,7 @@ const css = `
   .badge.error { color: var(--destructive); border-color: oklch(0.70 0.19 22 / 30%); }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-  /* ── Draft list ── */
+  /* Draft list */
   .draft-item {
     padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer;
     transition: background 0.1s; display: flex; align-items: flex-start; gap: 10px;
@@ -353,13 +327,22 @@ const css = `
   .draft-date { font-size: 10px; color: var(--muted-foreground); flex-shrink: 0; }
   .draft-empty { padding: 40px 16px; text-align: center; color: var(--muted-foreground); font-size: 12px; letter-spacing: 0.1em; }
 
-  /* ── Preview ── */
-  .preview-frame {
-    width: 100%; border: none; border-radius: calc(var(--radius) - 2px);
-    background: #fff; min-height: 400px;
+  /* Template list */
+  .template-item {
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+    transition: background 0.1s;
   }
+  .template-item:last-child { border-bottom: none; }
+  .template-item:hover { background: var(--secondary); }
+  .template-info { flex: 1; min-width: 0; }
+  .template-name { font-size: 13px; color: var(--foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+  .template-subject { font-size: 11px; color: var(--muted-foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .template-empty { padding: 40px 16px; text-align: center; color: var(--muted-foreground); font-size: 12px; letter-spacing: 0.1em; line-height: 2; }
+  .template-loading { padding: 40px 16px; text-align: center; color: var(--gold); font-size: 11px; letter-spacing: 0.2em; animation: blink 1s infinite; }
 
-  /* ── Toast ── */
+  .preview-frame { width: 100%; border: none; border-radius: calc(var(--radius) - 2px); background: #fff; min-height: 400px; }
+
   .toast {
     position: fixed; bottom: 80px; left: 50%;
     transform: translateX(-50%) translateY(16px);
@@ -373,13 +356,13 @@ const css = `
   .toast.success { color: oklch(0.70 0.16 160); border-color: oklch(0.70 0.16 160 / 30%); }
   .toast.error { color: var(--destructive); border-color: oklch(0.70 0.19 22 / 30%); }
 
-  /* ── Row utils ── */
   .row { display: flex; gap: 8px; align-items: center; }
   .row-between { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
 
-  /* ── Preview toggle ── */
-  .preview-toggle { width: 100%; padding: 10px 16px; background: var(--secondary); border: none; border-top: 1px solid var(--border); color: var(--muted-foreground); font-family: var(--font); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; transition: color 0.15s; }
-  .preview-toggle:hover { color: var(--foreground); }
+  .section-title {
+    font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--muted-foreground); padding: 12px 16px 8px;
+  }
 `;
 
 // ─── Main Component ────────────────────────────────────────────────────────────
@@ -395,8 +378,12 @@ export default function MailComposer() {
   const [buttonText, setButtonText] = useState('LEARN MORE');
   const [buttonUrl, setButtonUrl] = useState('#');
   const [heroImage, setHeroImage] = useState('https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&w=1200&q=80');
-  const [showPreview, setShowPreview] = useState(false);
   const [editingDraftId, setEditingDraftId] = useState(null);
+
+  // Templates
+  const [cloudTemplates, setCloudTemplates] = useState([]);
+  const [templatesLoading, setTemplatesLoading] = useState(false);
+  const [savingTemplate, setSavingTemplate] = useState(false);
 
   const [status, setStatus] = useState('idle');
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
@@ -408,9 +395,27 @@ export default function MailComposer() {
     setTimeout(() => setToast(t => ({ ...t, show: false })), 3000);
   };
 
-  // Apply template
-  const applyTemplate = (id) => {
-    const t = TEMPLATES.find(t => t.id === id);
+  // ── Load cloud templates ──
+  const fetchTemplates = async () => {
+    setTemplatesLoading(true);
+    try {
+      const res = await fetch('/api/templates');
+      const data = await res.json();
+      setCloudTemplates(Array.isArray(data) ? data : []);
+    } catch {
+      showToast('Failed to load templates', 'error');
+    } finally {
+      setTemplatesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (tab === 'templates') fetchTemplates();
+  }, [tab]);
+
+  // ── Apply starter template ──
+  const applyStarterTemplate = (id) => {
+    const t = STARTER_TEMPLATES.find(t => t.id === id);
     if (!t) return;
     setSubject(t.subject);
     setTitle(t.title);
@@ -420,17 +425,79 @@ export default function MailComposer() {
     setHeroImage(t.heroImage);
   };
 
-  // Preview HTML
-  const previewHTML = buildEmailHTML({ title, mainMessage: message, buttonText, buttonUrl, heroImage });
+  // ── Load cloud template into compose ──
+  const loadCloudTemplate = (t) => {
+    setSubject(t.subject || '');
+    setTitle(t.title || '');
+    setMessage(t.message || '');
+    setButtonText(t.button_text || 'LEARN MORE');
+    setButtonUrl(t.button_url || '#');
+    setHeroImage(t.hero_image || 'https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&w=1200&q=80');
+    setEditingDraftId(null);
+    setTab('compose');
+    showToast(`Loaded: ${t.name}`, 'success');
+  };
 
+  // ── Save current compose as cloud template ──
+  const saveAsTemplate = async () => {
+    if (!subject.trim() && !title.trim()) return showToast('Add a subject or title first', 'error');
+    setSavingTemplate(true);
+    try {
+      const name = subject.trim() || title.trim();
+      const newTemplate = {
+        id: `tpl_${Date.now()}`,
+        name,
+        subject: subject.trim(),
+        title: title.trim(),
+        message: message.trim(),
+        button_text: buttonText,
+        button_url: buttonUrl,
+        hero_image: heroImage,
+      };
+      const existing = await fetch('/api/templates').then(r => r.json());
+      const updated = Array.isArray(existing) ? [...existing, newTemplate] : [newTemplate];
+      const res = await fetch('/api/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      });
+      if (!res.ok) throw new Error('Save failed');
+      showToast('Saved to templates ✓', 'success');
+    } catch {
+      showToast('Failed to save template', 'error');
+    } finally {
+      setSavingTemplate(false);
+    }
+  };
+
+  // ── Delete cloud template ──
+  const deleteCloudTemplate = async (id, e) => {
+    e.stopPropagation();
+    try {
+      const updated = cloudTemplates.filter(t => t.id !== id);
+      const res = await fetch('/api/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      });
+      if (!res.ok) throw new Error();
+      setCloudTemplates(updated);
+      showToast('Template deleted');
+    } catch {
+      showToast('Failed to delete', 'error');
+    }
+  };
+
+  // ── Preview ──
+  const previewHTML = buildEmailHTML({ title, mainMessage: message, buttonText, buttonUrl, heroImage });
   useEffect(() => {
-    if (showPreview && iframeRef.current) {
+    if (tab === 'preview' && iframeRef.current) {
       const doc = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
       if (doc) { doc.open(); doc.write(previewHTML); doc.close(); }
     }
-  }, [showPreview, previewHTML]);
+  }, [tab, previewHTML]);
 
-  // Save draft
+  // ── Draft ──
   const saveDraft = () => {
     const draft = {
       id: editingDraftId || Date.now().toString(),
@@ -446,7 +513,6 @@ export default function MailComposer() {
     showToast('Draft saved', 'success');
   };
 
-  // Load draft
   const loadDraft = (draft) => {
     setTo(draft.to); setSubject(draft.subject); setTitle(draft.title);
     setMessage(draft.message); setButtonText(draft.buttonText);
@@ -456,7 +522,6 @@ export default function MailComposer() {
     showToast('Draft loaded');
   };
 
-  // Delete draft
   const deleteDraft = (id, e) => {
     e.stopPropagation();
     const updated = drafts.filter(d => d.id !== id);
@@ -466,20 +531,19 @@ export default function MailComposer() {
     showToast('Draft deleted');
   };
 
-  // Clear form
+  // ── Clear ──
   const clearForm = () => {
     setTo(''); setSubject(''); setTitle(''); setMessage('');
     setButtonText('LEARN MORE'); setButtonUrl('#');
     setHeroImage('https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&w=1200&q=80');
-    setEditingDraftId(null); setShowPreview(false);
+    setEditingDraftId(null);
   };
 
-  // Send
+  // ── Send ──
   const handleSend = async () => {
     if (!to.trim()) return showToast('Recipient required', 'error');
     if (!subject.trim()) return showToast('Subject required', 'error');
     if (!message.trim()) return showToast('Message body required', 'error');
-
     setStatus('sending');
     try {
       const html = buildEmailHTML({ title, mainMessage: message, buttonText, buttonUrl, heroImage });
@@ -492,7 +556,6 @@ export default function MailComposer() {
       if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
       setStatus('sent');
       showToast('Transmission sent ✓', 'success');
-      // Remove from drafts if it was a draft
       if (editingDraftId) {
         const updated = drafts.filter(d => d.id !== editingDraftId);
         setDrafts(updated); saveDrafts(updated);
@@ -522,7 +585,7 @@ export default function MailComposer() {
           </div>
           <div className="header-actions">
             <span className={`badge ${statusClass[status]}`}>{statusLabel[status]}</span>
-            <button className="btn btn-ghost" onClick={clearForm} title="New message">+ New</button>
+            <button className="btn btn-ghost" onClick={clearForm}>+ New</button>
           </div>
         </header>
 
@@ -531,10 +594,13 @@ export default function MailComposer() {
           <button className={`tab ${tab === 'compose' ? 'active' : ''}`} onClick={() => setTab('compose')}>
             ✦ Compose {editingDraftId ? '•' : ''}
           </button>
+          <button className={`tab ${tab === 'templates' ? 'active' : ''}`} onClick={() => setTab('templates')}>
+            ☆ Templates
+          </button>
           <button className={`tab ${tab === 'drafts' ? 'active' : ''}`} onClick={() => setTab('drafts')}>
             ◫ Drafts {drafts.length > 0 ? `(${drafts.length})` : ''}
           </button>
-          <button className={`tab ${tab === 'preview' ? 'active' : ''}`} onClick={() => { setTab('preview'); setShowPreview(true); }}>
+          <button className={`tab ${tab === 'preview' ? 'active' : ''}`} onClick={() => setTab('preview')}>
             ◎ Preview
           </button>
         </nav>
@@ -543,20 +609,17 @@ export default function MailComposer() {
         {tab === 'compose' && (
           <>
             <div className="content">
-
-              {/* Template picker */}
               <div className="card">
                 <div className="card-section">
-                  <label className="label">Template</label>
-                  <select className="select" onChange={e => applyTemplate(e.target.value)} defaultValue="blank">
-                    {TEMPLATES.map(t => (
+                  <label className="label">Quick Start</label>
+                  <select className="select" onChange={e => applyStarterTemplate(e.target.value)} defaultValue="blank">
+                    {STARTER_TEMPLATES.map(t => (
                       <option key={t.id} value={t.id}>{t.label}</option>
                     ))}
                   </select>
                 </div>
               </div>
 
-              {/* Recipients */}
               <div className="card">
                 <div className="card-section">
                   <label className="label">To</label>
@@ -568,7 +631,6 @@ export default function MailComposer() {
                 </div>
               </div>
 
-              {/* Content */}
               <div className="card">
                 <div className="card-section">
                   <label className="label">Email Title</label>
@@ -580,7 +642,6 @@ export default function MailComposer() {
                 </div>
               </div>
 
-              {/* Button */}
               <div className="card">
                 <div className="card-section">
                   <label className="label">Call-to-Action Button</label>
@@ -594,12 +655,15 @@ export default function MailComposer() {
                   <input className="input" type="url" value={heroImage} onChange={e => setHeroImage(e.target.value)} placeholder="https://..." />
                 </div>
               </div>
-
             </div>
 
-            {/* Footer */}
             <div className="footer-bar">
-              <button className="btn btn-secondary" onClick={saveDraft}>◫ Save Draft</button>
+              <div className="footer-left">
+                <button className="btn btn-secondary" onClick={saveDraft}>◫ Draft</button>
+                <button className="btn btn-save-template" onClick={saveAsTemplate} disabled={savingTemplate}>
+                  {savingTemplate ? 'Saving...' : '☆ Save Template'}
+                </button>
+              </div>
               <button className="btn btn-gold" onClick={handleSend} disabled={status === 'sending'}>
                 {status === 'sending' ? 'Transmitting...' : 'Transmit →'}
               </button>
@@ -607,10 +671,42 @@ export default function MailComposer() {
           </>
         )}
 
+        {/* ── Templates Tab ── */}
+        {tab === 'templates' && (
+          <div className="content" style={{ padding: 0 }}>
+            <div className="section-title">Cloud Templates — tap to load into compose</div>
+            <div className="card" style={{ margin: '0 16px 16px' }}>
+              {templatesLoading ? (
+                <div className="template-loading">Loading templates...</div>
+              ) : cloudTemplates.length === 0 ? (
+                <div className="template-empty">
+                  No templates saved yet.<br />
+                  Compose an email and tap<br />
+                  <strong style={{ color: 'var(--gold)' }}>☆ Save Template</strong> to save it here.
+                </div>
+              ) : (
+                cloudTemplates.map(t => (
+                  <div key={t.id} className="template-item" onClick={() => loadCloudTemplate(t)}>
+                    <div className="template-info">
+                      <div className="template-name">{t.name}</div>
+                      <div className="template-subject">{t.subject || '(no subject)'}</div>
+                    </div>
+                    <button className="btn btn-danger" onClick={e => deleteCloudTemplate(t.id, e)}>✕</button>
+                  </div>
+                ))
+              )}
+            </div>
+            <button className="btn btn-secondary" style={{ margin: '0 16px', width: 'calc(100% - 32px)' }} onClick={fetchTemplates}>
+              ↺ Refresh
+            </button>
+          </div>
+        )}
+
         {/* ── Drafts Tab ── */}
         {tab === 'drafts' && (
           <div className="content" style={{ padding: 0 }}>
-            <div className="card" style={{ margin: 16 }}>
+            <div className="section-title">Local Drafts — saved on this device</div>
+            <div className="card" style={{ margin: '0 16px' }}>
               {drafts.length === 0 ? (
                 <div className="draft-empty">No drafts saved yet</div>
               ) : (
@@ -638,20 +734,14 @@ export default function MailComposer() {
           <div className="content">
             <div className="card">
               <div className="card-section">
-                <div className="row-between" style={{ marginBottom: 0 }}>
+                <div className="row-between">
                   <span className="label" style={{ marginBottom: 0 }}>Live Preview — SpaceX Theme</span>
                   <span style={{ fontSize: 10, color: 'var(--muted-foreground)', letterSpacing: '0.1em' }}>
                     {subject || '(no subject)'}
                   </span>
                 </div>
               </div>
-              <iframe
-                ref={iframeRef}
-                className="preview-frame"
-                title="Email Preview"
-                sandbox="allow-same-origin"
-                style={{ height: 500 }}
-              />
+              <iframe ref={iframeRef} className="preview-frame" title="Email Preview" sandbox="allow-same-origin" style={{ height: 500 }} />
             </div>
             <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => setTab('compose')}>
               ← Back to Compose
@@ -661,8 +751,8 @@ export default function MailComposer() {
 
       </div>
 
-      {/* Toast */}
       <div className={`toast ${toast.show ? 'show' : ''} ${toast.type}`}>{toast.msg}</div>
     </>
   );
 }
+
