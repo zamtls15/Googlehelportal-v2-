@@ -1,33 +1,65 @@
-# 🚀 SpaceX Member Portal (Simple Guide)
+# Google Help Portal V2
 
-Hello, Astronaut! 🧑‍🚀
-
-This is a special computer place for people who love rockets. Here is how it works, explained like we are playing with blocks!
-
-## 🚪 Step 1: The Magic Door
-When you want to go inside, you tell the computer your favorite email.
-The computer sends a **Magic Code** to your secret mailbox. You type that code in, and *BEEP BOOP*—the door opens!
-
-## 🏅 Step 2: Your Space Badge
-Once you are inside, you will see your very own **Space Badge**. 
-It shows:
-- Your name (So everyone knows you!)
-- Your job (Are you a pilot or a galaxy explorer?)
-- Your special medals!
-
-## 🧪 Step 3: Pick a Space Ship
-You can choose which rocket you want to ride. 
-- Some go to the Moon.
-- Some go to Mars!
-- You can look at all the cool rocket plans.
-
-## 👑 The Space Captains (Admins)
-There are special people called **Space Captains**. 
-They are the ones who put your name on the list and give you your medals. If you don't have a badge yet, a Captain needs to make one for you!
-
-## 🌙 Bedtime button (Logout)
-When you are done looking at rockets, you hit the **Special Red Button**. 
-It locks the door safely so no space monsters can get in. 
+A multi-page HTML application for managing Google Help Portal operations, featuring Firebase auth, Supabase user management, and Resend email delivery — deployed on Vercel.
 
 ---
-**Happy Flying!** 🚀✨
+
+## ⚠️ Critical Rules — Read Before Touching Anything
+
+### 1. This Is NOT a React App
+The project uses a **multi-page HTML architecture**. The real app lives in:
+pages/login.html
+pages/user.html
+pages/email-admin.html
+pages/hq-control-7x9k.html
+pages/compose/index.html
+The `src/` folder only exists as a Vite entry point. **Do not add React logic to `src/App.tsx`**.
+
+---
+
+### 2. Never Edit vite.config.ts with sed
+Always rewrite the whole file using `cat > vite.config.ts << 'EOF'` or use `nano`.
+
+---
+
+### 3. Environment Variables Required
+
+| Variable | Required |
+|---|---|
+| `RESEND_API_KEY` | ✅ Yes |
+| `SUPABASE_URL` | ✅ Yes |
+| `SUPABASE_SERVICE_KEY` | ✅ Yes |
+| `APP_URL` | ✅ Yes |
+| `GEMINI_API_KEY` | ❌ Removed |
+
+```bash
+vercel env pull .env
+4. Never Expose API Keys in Chat or Logs
+Rotate immediately if leaked:
+Resend: resend.com/api-keys
+Supabase: Project Settings → API
+Vercel: Settings → Tokens
+5. Always Build Before Pushing
+npm run build && git add . && git commit -m "fix: description" && git push origin main && vercel --prod
+6. index.html Must Always Redirect to Login
+<meta http-equiv="refresh" content="0; url=/pages/login" />
+Never replace it with a React mount point or the app goes blank.
+7. Termux Tips
+Use ~/ not /tmp
+Split sessions by swiping left edge
+Always cd into correct project before Vercel commands
+8. Lessons Learned
+Problem
+Cause
+Fix
+Blank page
+index.html pointed to empty React stub
+Redirect to /pages/login
+Missing env vars
+Vercel v2 never had them
+vercel env pull + vercel env add
+Corrupt vite.config.ts
+sed deleted closing brackets
+Rewrote entire file
+Local Dev
+npm install && vercel env pull .env && npm run dev
