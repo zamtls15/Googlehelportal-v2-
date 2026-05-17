@@ -378,6 +378,13 @@ export default function MailComposer() {
   const [buttonText, setButtonText] = useState('LEARN MORE');
   const [buttonUrl, setButtonUrl] = useState('#');
   const [heroImage, setHeroImage] = useState('https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&w=1200&q=80');
+  // Auto-fill from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const toParam = params.get('to');
+    if (toParam) setTo(decodeURIComponent(toParam));
+  }, []);
+
   const [editingDraftId, setEditingDraftId] = useState(null);
 
   // Templates
