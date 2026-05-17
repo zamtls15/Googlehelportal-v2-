@@ -1,65 +1,177 @@
-# Google Help Portal V2
+# Supabase CLI
 
-A multi-page HTML application for managing Google Help Portal operations, featuring Firebase auth, Supabase user management, and Resend email delivery — deployed on Vercel.
+[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=develop)](https://coveralls.io/github/supabase/cli?branch=develop) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
+](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
 
----
+[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
 
-## ⚠️ Critical Rules — Read Before Touching Anything
+This repository contains all the functionality for Supabase CLI.
 
-### 1. This Is NOT a React App
-The project uses a **multi-page HTML architecture**. The real app lives in:
-pages/login.html
-pages/user.html
-pages/email-admin.html
-pages/hq-control-7x9k.html
-pages/compose/index.html
-The `src/` folder only exists as a Vite entry point. **Do not add React logic to `src/App.tsx`**.
+- [x] Running Supabase locally
+- [x] Managing database migrations
+- [x] Creating and deploying Supabase Functions
+- [x] Generating types directly from your database schema
+- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
 
----
+## Getting started
 
-### 2. Never Edit vite.config.ts with sed
-Always rewrite the whole file using `cat > vite.config.ts << 'EOF'` or use `nano`.
+### Install the CLI
 
----
-
-### 3. Environment Variables Required
-
-| Variable | Required |
-|---|---|
-| `RESEND_API_KEY` | ✅ Yes |
-| `SUPABASE_URL` | ✅ Yes |
-| `SUPABASE_SERVICE_KEY` | ✅ Yes |
-| `APP_URL` | ✅ Yes |
-| `GEMINI_API_KEY` | ❌ Removed |
+Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
 
 ```bash
-vercel env pull .env
-4. Never Expose API Keys in Chat or Logs
-Rotate immediately if leaked:
-Resend: resend.com/api-keys
-Supabase: Project Settings → API
-Vercel: Settings → Tokens
-5. Always Build Before Pushing
-npm run build && git add . && git commit -m "fix: description" && git push origin main && vercel --prod
-6. index.html Must Always Redirect to Login
-<meta http-equiv="refresh" content="0; url=/pages/login" />
-Never replace it with a React mount point or the app goes blank.
-7. Termux Tips
-Use ~/ not /tmp
-Split sessions by swiping left edge
-Always cd into correct project before Vercel commands
-8. Lessons Learned
-Problem
-Cause
-Fix
-Blank page
-index.html pointed to empty React stub
-Redirect to /pages/login
-Missing env vars
-Vercel v2 never had them
-vercel env pull + vercel env add
-Corrupt vite.config.ts
-sed deleted closing brackets
-Rewrote entire file
-Local Dev
-npm install && vercel env pull .env && npm run dev
+npm i supabase --save-dev
+```
+
+When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
+
+```
+NODE_OPTIONS=--no-experimental-fetch yarn add supabase
+```
+
+> **Note**
+For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
+
+<details>
+  <summary><b>macOS</b></summary>
+
+  Available via [Homebrew](https://brew.sh). To install:
+
+  ```sh
+  brew install supabase/tap/supabase
+  ```
+
+  To install the beta release channel:
+  
+  ```sh
+  brew install supabase/tap/supabase-beta
+  brew link --overwrite supabase-beta
+  ```
+  
+  To upgrade:
+
+  ```sh
+  brew upgrade supabase
+  ```
+</details>
+
+<details>
+  <summary><b>Windows</b></summary>
+
+  Available via [Scoop](https://scoop.sh). To install:
+
+  ```powershell
+  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+  scoop install supabase
+  ```
+
+  To upgrade:
+
+  ```powershell
+  scoop update supabase
+  ```
+</details>
+
+<details>
+  <summary><b>Linux</b></summary>
+
+  Available via [Homebrew](https://brew.sh) and Linux packages.
+
+  #### via Homebrew
+
+  To install:
+
+  ```sh
+  brew install supabase/tap/supabase
+  ```
+
+  To upgrade:
+
+  ```sh
+  brew upgrade supabase
+  ```
+
+  #### via Linux packages
+
+  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
+
+  ```sh
+  sudo apk add --allow-untrusted <...>.apk
+  ```
+
+  ```sh
+  sudo dpkg -i <...>.deb
+  ```
+
+  ```sh
+  sudo rpm -i <...>.rpm
+  ```
+
+  ```sh
+  sudo pacman -U <...>.pkg.tar.zst
+  ```
+</details>
+
+<details>
+  <summary><b>Other Platforms</b></summary>
+
+  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
+
+  ```sh
+  go install github.com/supabase/cli@latest
+  ```
+
+  Add a symlink to the binary in `$PATH` for easier access:
+
+  ```sh
+  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
+  ```
+
+  This works on other non-standard Linux distros.
+</details>
+
+<details>
+  <summary><b>Community Maintained Packages</b></summary>
+
+  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
+  To install in your working directory:
+
+  ```bash
+  pkgx install supabase
+  ```
+
+  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
+</details>
+
+### Run the CLI
+
+```bash
+supabase bootstrap
+```
+
+Or using npx:
+
+```bash
+npx supabase bootstrap
+```
+
+The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
+
+## Docs
+
+Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
+
+## Breaking changes
+
+We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
+
+However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
+
+## Developing
+
+To run from source:
+
+```sh
+# Go >= 1.22
+go run . help
+```
